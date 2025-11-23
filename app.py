@@ -12,6 +12,7 @@ import os
 import json
 from pathlib import Path
 import cv2
+from huggingface_hub import hf_hub_download
 
 app = Flask(__name__)
 CORS(app)
@@ -154,8 +155,25 @@ def load_model():
     # Load ResNet50 architecture
     model = models.resnet50(pretrained=False)
     
-    # Try to load custom checkpoint
-    checkpoint_path = Path(__file__).parent.parent / 'latest_checkpoint.pth'
+    # Try to download model from Hugging Face if not present locally
+    checkpoint_path = Path(__file__).parent / 'latest_checkpoint.pth'
+    
+    if not checkpoint_path.exists():
+        try:
+            print("📥 Downloading model from Hugging Face...")
+            downloaded_path = hf_hub_download(
+                repo_id="pragsyy1729/now_you_see_me",
+                filename="latest_checkpoint.pth",
+                cache_dir=str(Path(__file__).parent)
+            )
+            # Move to expected location
+            import shutil
+            shutil.copy(downloaded_path, checkpoint_path)
+            print("✅ Model downloaded successfully from Hugging Face")
+        except Exception as e:
+            print(f"⚠️  Could not download from Hugging Face: {e}")
+    
+    # Try to load checkpoint
     if checkpoint_path.exists():
         try:
             checkpoint = torch.load(checkpoint_path, map_location='cpu')
