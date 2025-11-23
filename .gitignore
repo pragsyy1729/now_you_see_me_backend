@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Model files (too large for GitHub)
+*.pth
+*.ckpt
+*.h5
+*.pb
+
+# Uploads
+uploads/
+
+# Environment variables
+.env
