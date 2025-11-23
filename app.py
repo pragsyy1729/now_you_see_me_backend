@@ -386,10 +386,8 @@ def process_image():
         return jsonify({'error': 'No image provided'}), 400
     
     try:
-        # Load model if not loaded
-        if model is None:
-            load_model()
-            register_hooks()
+        # Ensure model is loaded
+        ensure_model_loaded()
         
         # Read and preprocess image
         image_file = request.files['image']
@@ -524,13 +522,19 @@ def index():
 
 # Initialize model when app starts (for production servers like Gunicorn)
 def init_app():
-    """Initialize the application"""
+    """Initialize the application - load classes but defer model loading"""
     print("🚀 Starting ResNet50 Visualization Backend...")
-    print("📦 Loading model...")
-    load_model()
     load_imagenet_classes()
-    register_hooks()
-    print("✅ Model loaded successfully!")
+    print("✅ Backend initialized! Model will load on first request.")
+
+def ensure_model_loaded():
+    """Lazy load model on first request to save memory during startup"""
+    global model
+    if model is None:
+        print("📦 Loading model on first request...")
+        load_model()
+        register_hooks()
+        print("✅ Model loaded successfully!")
 
 # Call init when module is imported (works with Gunicorn)
 init_app()
