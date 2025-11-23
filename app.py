@@ -508,12 +508,33 @@ def get_layer_activation(layer_name):
         'activation': activation_data
     })
 
-if __name__ == '__main__':
+@app.route('/', methods=['GET'])
+def index():
+    """Root endpoint with status information"""
+    return jsonify({
+        'service': 'ResNet50 3D Visualization Backend',
+        'status': 'running',
+        'model_loaded': model is not None,
+        'endpoints': {
+            'health': '/api/health',
+            'model_info': '/api/model-info',
+            'process_image': '/api/process-image (POST)'
+        }
+    })
+
+# Initialize model when app starts (for production servers like Gunicorn)
+def init_app():
+    """Initialize the application"""
     print("🚀 Starting ResNet50 Visualization Backend...")
     print("📦 Loading model...")
     load_model()
     load_imagenet_classes()
     register_hooks()
     print("✅ Model loaded successfully!")
+
+# Call init when module is imported (works with Gunicorn)
+init_app()
+
+if __name__ == '__main__':
     print("🌐 Backend running on http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
